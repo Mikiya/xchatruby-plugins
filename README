@@ -19,8 +19,12 @@ user is not away.
   Configuration
   -------------
 
-  1. Create a file named ~/.xchat2/greet.conf and edit like below.
-  
+  1. Ensure the plugin is loaded.
+
+    /rb list
+
+  2. Create a file named ~/.xchat2/greet.conf and edit like below.
+
     greet_word            "hi"            # Greetings word.
     wb_word               "welcome back"  # Greetings word when a user comes
                                           # back within short time.
@@ -29,14 +33,14 @@ user is not away.
     wb_period             60 * 60         # A period to assumed as wb.
     cooling_off_period    60 * 60 * 8     # A period to assumed as offline.
 
-  2. List all nicknames to say hello to in ~/.xchat2/known_nicks.
+  3. List all nicknames to say hello to in ~/.xchat2/known_nicks.
 
     e.g.)
     tom
     john
     taro
 
-  3. Then the plugin starts saying hello to listed nicknames automatically.
+  4. Then the plugin starts saying hello to listed nicknames automatically.
 
   Usage
   -----
@@ -52,3 +56,34 @@ user is not away.
 
   2. If you wish to say hello to all people you know, submit "/greet all".
 
+---------------
+chat_indexer.rb
+---------------
+Organize fulltext indexes upon Groonga and enable fulltext searches via command.
+
+  Configuration
+  -------------
+
+  1. Install Groonga
+
+    http://groonga.org/
+
+  2. Install rroonga
+
+    shell> gem install groonga
+
+  3. Ensure the plugin is loaded.
+
+    /rb list
+
+  4. The plugin automatically organize indexes.
+
+  Usage
+  -----
+
+  /indexer
+         help           ... Show this help.
+         find {word}    ... Do fulltext search.
+         show {msg_id}  ... Display individual lines around a certain msg_id.
+         last           ... Display the last search result.
+         lines [#]      ... Show/set lines to display results. Default is 20.

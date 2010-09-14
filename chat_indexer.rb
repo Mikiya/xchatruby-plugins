@@ -66,14 +66,7 @@ module XChatIndexer
       else
         FileUtils.mkdir_p(base_path)
         @database = Groonga::Database.create(:path => path)
-      end
-      define_schema
-      if block_given?
-        begin
-          yield(self)
-        ensure
-          close unless closed?
-        end
+        define_schema
       end
     end
 
@@ -216,7 +209,7 @@ class XChatIndexerPlugin < XChatRubyRBPlugin
          find {word}    ... Do fulltext search.
          show {msg_id}  ... Display individual lines around a certain msg_id.
          last           ... Display the last search result.
-         lines [#]      ... Show/set lines to display results. Default is 10.
+         lines [#]      ... Show/set lines to display results. Default is 20.
 '
 
   # Populate instance variables and define hooks.
