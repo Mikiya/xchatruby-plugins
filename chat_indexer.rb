@@ -185,7 +185,7 @@ module XChatIndexer
 #           table.boolean("highlighted")
           table.time("timestamp")
         end
-        
+
         schema.create_table("Terms",
                             :type => :patricia_trie,
                             :key_type => "ShortText",
