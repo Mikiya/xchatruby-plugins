@@ -62,7 +62,7 @@ class AutoGreets < XChatRubyRBPlugin
     @cooling_off_period = 60 * 60 * 8
     @greet_channel_list = []
 
-    config_file = File.join(get_info('xchatdir'), 'greets.conf')
+    config_file = File.join(get_info('xchatdir'), 'greet.conf')
     if File.exists?(config_file)
       eval File.read(config_file)
     else
@@ -72,8 +72,8 @@ class AutoGreets < XChatRubyRBPlugin
 
     nick_file = File.join(get_info('xchatdir'), 'known_nicks')
     if File.exists?(nick_file)
-      @known_nicks = File.read(nick_file).split("\n").sort.uniq
-      @known_nicks.delete_if { |x| x =~ /^#/ or x =~/^$/ }
+      @known_nicks = File.read(nick_file).split("\n").gsub(/#.*$/, '').strip.sort.uniq
+      @known_nicks.delete_if { |x| x =~/^$/ }
     else
       puts "#{@script_name} was failed to load."
       return

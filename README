@@ -1,0 +1,54 @@
+Trivial XChat-Ruby plugin set
+
+------------
+Installation
+------------
+
+* Install XChat version 2.6 or later
+* Install XChat-Ruby Plugins.
+* Setup rubyenv (ruby -e 'puts $:' > ~/.xchat2/rubyenv)
+* Copy all .rb files under ~/.xchat2.
+
+--------------
+auto_greets.rb
+--------------
+Say greetings automatically when a user joined a channel, or a user changed
+his/her nickname from what indicates the user is away to what indicates the
+user is not away.
+
+  Configuration
+  -------------
+
+  1. Create a file named ~/.xchat2/greet.conf and edit like below.
+  
+    greet_word            "hi"            # Greetings word.
+    wb_word               "welcome back"  # Greetings word when a user comes
+                                          # back within short time.
+    delay                 5               # Seconds to wait after a user joined
+                                          # a channel before say greetings.
+    wb_period             60 * 60         # A period to assumed as wb.
+    cooling_off_period    60 * 60 * 8     # A period to assumed as offline.
+
+  2. List all nicknames to say hello to in ~/.xchat2/known_nicks.
+
+    e.g.)
+    tom
+    john
+    taro
+
+  3. Then the plugin starts saying hello to listed nicknames automatically.
+
+  Usage
+  -----
+  
+  1. You can see some information using /greet command at any time.
+
+      /greet
+          help           ... Show this help.
+          all            ... Say greetings to all known nicks.
+          status         ... Show status per nick.
+          list           ... List all nicks to say greetings.
+          config         ... Display current config.
+
+  2. If you wish to say hello to all people you know, submit "/greet all".
+
