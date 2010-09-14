@@ -163,9 +163,20 @@ class AutoGreets < XChatRubyRBPlugin
         list_nicks
       when "config"
         show_config
+      when "test"
+        do_test
       end
     end
     return XCHAT_EAT_NONE
+  end
+
+  def do_test
+    ctx = XChatRuby::XChatRubyEnvironment.find_context(nil, "#support_jp-spam")
+    hash = {
+      :words => "this is a test",
+      :ctx => ctx,
+      }
+    hook_timer(@delay * 1000, method(:say_with_context), hash)
   end
 
   def display_help
@@ -181,8 +192,19 @@ class AutoGreets < XChatRubyRBPlugin
     ret.sort
   end
 
+  def get_channels
+    ret = []
+    users = XChatRuby::XChatRubyList.new("channels")
+    while users.next do
+      ret.push(users.str('channel'))
+    end
+    ret.sort
+  end
+
   def status_nick(nick)
-    puts "#{nick.ljust(16)}: #{@status[nick][:last_greet]}"
+    last_greet = (@status[nick].nil? or @status[nick][:last_greet].nil?) ?\
+        '--' : @status[nick][:last_greet]
+    puts "#{nick.ljust(16)}: #{last_greet}"
   end
 
   def print_status
@@ -207,7 +229,18 @@ class AutoGreets < XChatRubyRBPlugin
   end
 
   def timed_print(words)
-    hook_timer(@delay * 1000, say, words)
+    ctx = XChatRuby::XChatRubyEnvironment.get_context()
+    hash = {
+        :words => words,
+        :ctx => ctx,
+      }
+    hook_timer(@delay * 1000, method(:say_with_context), hash)
+  end
+
+  def say_with_context(hash)
+    ctx = hash[:ctx]
+    XChatRuby::XChatRubyEnvironment.set_context(ctx) unless ctx.nil?
+    say(hash[:words])
   end
 
   def say_greetings(who)
@@ -218,26 +251,27 @@ class AutoGreets < XChatRubyRBPlugin
     timed_print "#{@wb_word} #{who}"
   end
 
-  def say_greetings_or_wb(who)
-    return if @status[who].nil? or @status[who][:last_greet].nil?
-    period = Time.new - @status[who][:last_greet]
-    if period > @cooling_off_period
-      say_greetings(who)
-    elsif period > @wb_period
+  def say_greetings_or_wb(who, channel)
+    return if @status[who].nil?
+
+    period = @status[who][:last_greet].nil? ? @cooling_off_period + 1 : Time.new - @status[who][:last_greet]
+    return if period < @wb_period
+
+    if period < @cooling_off_period
       say_wb(who)
     else
-      # too short to say greetings.
-      return
+      say_greetings(who)
     end
     @status[who][:last_greet] = Time.new
   end
 
   def join_hook(words, data)
     return XCHAT_EAT_NONE if away?
-    unless @greet_channel_list.include? words[1]
+    channel = words[1].gsub(/^#/, '')
+    unless @greet_channel_list.include? channel
       return XCHAT_EAT_NONE
     end
-    say_greetings_or_wb(normalize_nick(words[0]))
+    say_greetings_or_wb(normalize_nick(words[0]), channel)
     return XCHAT_EAT_NONE
   end
 
@@ -248,7 +282,7 @@ class AutoGreets < XChatRubyRBPlugin
     end
     away_re = /[\|\_](afk|away|awy|zzz|bbl|brb|out)/i
     if words[0] =~ away_re and not words[1] =~ away_re
-      say_greetings_or_wb(normalize_nick(words[1]))
+      say_greetings_or_wb(normalize_nick(words[1]), nil)
     end
     return XCHAT_EAT_NONE
   end
