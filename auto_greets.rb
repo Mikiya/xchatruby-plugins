@@ -72,7 +72,8 @@ class AutoGreets < XChatRubyRBPlugin
 
     nick_file = File.join(get_info('xchatdir'), 'known_nicks')
     if File.exists?(nick_file)
-      @known_nicks = File.read(nick_file).split("\n").gsub(/#.*$/, '').strip.sort.uniq
+      @known_nicks = File.read(nick_file).split("\n").sort.uniq
+      @known_nicks = @known_nicks.map {|x| x.gsub(/#.*$/, '').strip}
       @known_nicks.delete_if { |x| x =~/^$/ }
     else
       puts "#{@script_name} was failed to load."
