@@ -9,6 +9,11 @@ Installation
 * Setup rubyenv (ruby -e 'puts $:' > ~/.xchat2/rubyenv)
 * Copy all .rb files under ~/.xchat2.
 
+-------
+License
+-------
+GPLv2. See COPYING for more details.
+
 --------------
 auto_greets.rb
 --------------

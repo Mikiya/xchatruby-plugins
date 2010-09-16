@@ -165,8 +165,7 @@ module XChatIndexer
         end
 
         schema.create_table("Messages",
-                            :type => :array,
-                            :key_type => "ShortText") do |table|
+                            :type => :array) do |table|
           table.short_text("server")
           table.short_text("channel")
           table.short_text("nick")
