@@ -74,6 +74,18 @@ module XChatIndexer
       Groonga['Messages'].add(attributes)
     end
 
+    # a simple method to organize a hash including a record
+    def get_message_as_hash(r)
+      {
+        :id => r.id,
+        :server => r.server,
+        :channel => r.channel,
+        :nick => r.nick,
+        :message => r.message,
+        :timestamp => r.timestamp,
+        }
+    end
+
     # Perform fulltext search
     def find_message(server ,channel, words, n)
       query = "server:#{server} + channel:#{channel} "\
@@ -81,74 +93,32 @@ module XChatIndexer
       Groonga['Messages'].select do |record|
         record.match(query)
       end.sort([["_id", :descending]], :limit => n).collect do |r|
-        {
-            :id => r.id,
-            :server => r.server,
-            :channel => r.channel,
-            :nick => r.nick,
-            :message => r.message,
-            :timestamp => r.timestamp,
-          }
+        get_message_as_hash(r)
       end.reverse
     end
 
     # Display messages before/after the certain message on the specific server/channel
     def show_n_messages(msg_id, n)
-      result = Groonga['Messages'].select do |record|
+      the_record = Groonga['Messages'].select do |record|
         record.id == msg_id
-      end
-
-      the_record = result.collect do |r|
-        {
-          :id => r["._id"],
-          :server => r[".server"],
-          :channel => r[".channel"],
-          :nick => r[".nick"],
-          :message => r[".message"],
-          :timestamp => r[".timestamp"],
-        }
+      end.collect do |r|
+        get_message_as_hash(r)
       end
       return nil if the_record.nil? or the_record.size == 0
       the_record = the_record[0]
 
+      query = "server:#{the_record[:server]} + channel:#{the_record[:channel]}"
       messages = Groonga['Messages'].select do |record|
-        [
-          record.id < msg_id,
-          record.server == the_record[:server],
-          record.channel == the_record[:channel],
-        ]
+        record.match("#{query} + _id:<#{msg_id}")
       end.sort([["_id", :descending]], :limit => n/2).collect do |r|
-        {
-          :id => r["._id"],
-          :nick => r[".nick"],
-          :message => r[".message"],
-          :timestamp => r[".timestamp"],
-          }
-      end.reverse
-
-      messages << {
-        :id => the_record[:id],
-        :nick => the_record[:nick],
-        :message => the_record[:message],
-        :timestamp => the_record[:timestamp],
-        }
-
-      messages += Groonga['Messages'].select do |record|
-        [
-          record.id > msg_id,
-          record.server == the_record[:server],
-          record.channel == the_record[:channel],
-          ]
-      end.sort([["_id", :ascending]], :limit => n/2).collect do |r|
-        {
-          :id => r["._id"],
-          :nick => r[".nick"],
-          :message => r[".message"],
-          :timestamp => r[".timestamp"],
-          }
-      end
-
-      messages
+        get_message_as_hash(r)
+      end.reverse.push(the_record).concat(
+        Groonga['Messages'].select do |record|
+          record.match("#{query} + _id:>#{msg_id}")
+        end.sort([["_id", :ascending]], :limit => n/2).collect do |r|
+          get_message_as_hash(r)
+        end
+      )
     end
 
     # Define the schema to store messages
