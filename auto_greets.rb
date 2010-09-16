@@ -143,8 +143,16 @@ class AutoGreets < XChatRubyRBPlugin
 
   def greet_all
     avail = get_users().find_all {|x| @known_nicks.include?(x.downcase) }
-    avail << "all"
+    now = Time.new
+    avail.delete_if do |x|
+      next if @status[x].nil? or @status[x][:last_greet].nil?
+      (now - @status[x][:last_greet]) < @cooling_off_period
+    end
     say "#{@greet_word} #{avail.join(', ')}"
+    avail.map do |x|
+      @status[x] = {} if @status[x].nil?
+      @status[x][:last_greet] = now
+    end
   end
 
   def handle_command(words, words_eol, data)

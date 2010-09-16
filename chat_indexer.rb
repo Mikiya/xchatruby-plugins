@@ -32,17 +32,6 @@ rescue LoadError
   require 'groonga'
 end
 
-class Numeric
-  def roundoff(d=0)
-    x = 10**d
-    if self < 0
-      (self * x - 0.5).ceil.quo(x)
-    else
-      (self * x + 0.5).floor.quo(x)
-    end
-  end
-end
-
 module XChatIndexer
 #
 # Data access object
@@ -284,9 +273,14 @@ class XChatIndexerPlugin < XChatRubyRBPlugin
         show_n_messages words[2].to_i
       when "last"
         print_results
+      when "test"
+        do_test
       end
     end
     return XCHAT_EAT_NONE
+  end
+
+  def do_test
   end
 
   # Display a help to the current message box.
@@ -313,7 +307,7 @@ class XChatIndexerPlugin < XChatRubyRBPlugin
     day = (t / (24 * 60 * 60)).to_i
     hour = (t % (24 * 60 * 60) / (60 * 60)).to_i
     min = (t % (60 * 60) / 60).to_i
-    sec = (t % 60).roundoff(2)
+    sec = sprintf('%.2f', (t % 60))
     case
     when t < 60
       "#{sec} sec"
