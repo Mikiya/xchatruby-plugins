@@ -76,23 +76,18 @@ module XChatIndexer
 
     # Perform fulltext search
     def find_message(server ,channel, words, n)
-      result = Groonga['Messages'].select do |record|
-        words.split.collect do |w|
-          record.message =~ w
-        end.unshift([
-                     record.channel == channel,
-                     record.server == server,
-                    ]).flatten
-      end.sort([["_id", :descending]], :limit => n)
-
-      result.collect do |r|
+      query = "server:#{server} + channel:#{channel} "\
+          << words.collect {|w| "message:@#{w}"}.join(' + ')
+      Groonga['Messages'].select do |record|
+        record.match(query)
+      end.sort([["_id", :descending]], :limit => n).collect do |r|
         {
-            :id => r["._id"],
-            :server => r[".server"],
-            :channel => r[".channel"],
-            :nick => r[".nick"],
-            :message => r[".message"],
-            :timestamp => r[".timestamp"],
+            :id => r.id,
+            :server => r.server,
+            :channel => r.channel,
+            :nick => r.nick,
+            :message => r.message,
+            :timestamp => r.timestamp,
           }
       end.reverse
     end
